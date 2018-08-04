@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Ajax calls</title>
+	<style>
+		#blok{
+			width: 300px;
+			height: 240px;
+			background: #17eae7;
+			margin: 20px auto;
+			margin-bottom: 0px;
+		}
+		.time{
+			font-family: Arial;
+		    color: white;
+		    margin-left: 26px;
+		    position: absolute;
+		    font-size: 12px;
+		}
+		.textWeather{
+			text-align: center;
+		    /* margin-top: 120px; */
+		    font-size: 36px;
+		    color: white;
+		    font-family: Arial;
+		}
+		.pictures{
+			margin-left: 80px;
+    		margin-top: 70px;
+		}
+		
+		.windPower{
+			display: inline-block;
+		    float: right;
+		    margin-right: 30px;
+		    font-size: 20px;
+		    color: white;
+		    font-family: Arial;
+		}
+		.windVector{
+			display: inline-block;
+			margin-left: 30px;
+		    font-size: 20px;
+		    color: white;
+		    font-family: Arial;
+		}
+		.blok_day{
+			    width: 300px;
+			    height: 150px;
+			    background: #cac8c8;
+			    margin: 0px auto;
+		}
+		.fon{
+			background-color: #dfdfdf;
+		    height: 40px;
+		    border-bottom: 1px solid #b6b6b6;
+		}
+		.day{
+			padding-top: 13px;
+		    padding-left: 5px;
+		    float: left;
+		}
+
+		.pictures_icon{
+			margin-left: 24px;
+    		margin-top: -4px;
+		}
+		.DayWeather{
+			float: right;
+		    padding-top: 13px;
+		    padding-right: 5px;
+		}
+
+		.img{
+			width: 16px;
+		    height: 16px;
+		    float: left;
+		    margin-top: 10px;
+		    margin-left: 5px;
+		}
+
+	</style>
+</head>
+
+<body>
+	
+	<div id="blok">
+		<img class = "img" src="clock.png">
+	</div>
+	
+
+
+	
+
+
+	<script type="text/javascript">
+
+	
+	var blok = document.getElementById("blok");	
+
+	function getWeather() {
+
+	var req = new XMLHttpRequest();
+	
+	req.onload = function() {
+		
+		var result = req.response; // ответ api в json
+
+		function createWeatherNow(){
+			
+			
+			var p1 = document.createElement("p");
+			p1.className = "time";
+			var time = result.list[0].dt_txt.split(" ")[1];
+			p1.textContent = time; // время 
+			blok.appendChild(p1);
+
+			var img = document.createElement("img");
+			img.className = "pictures";
+			img.setAttribute("src", result.list[0].weather[0].icon + ".png"); // иконка текущей погоды
+			blok.appendChild(img);
+
+			var div = document.createElement("div");
+			div.className = "textWeather";
+			div.textContent = (result.list[0].main.temp - 273).toFixed() + " С°"; // температура в Цельсия 
+			blok.appendChild(div);
+
+			var p2 = document.createElement("p");
+			p2.className = "windPower";
+			p2.textContent = (result.list[0].wind.speed).toFixed() + " m/s"; // ветер в м/с
+			blok.appendChild(p2);
+
+			var p3 = document.createElement("p"); // направление ветра
+			p3.className = "windVector";
+
+			if( (result.list[0].wind.deg).toFixed() <= 45 ) {
+				p3.textContent = "north";
+			}
+
+			else if( (result.list[0].wind.deg).toFixed() >= 45 && (result.list[0].wind.deg).toFixed() <= 90) {
+				p3.textContent = "north - west";
+			}
+			
+			else if( (result.list[0].wind.deg).toFixed() >= 90 && (result.list[0].wind.deg).toFixed() <= 135 ){
+				p3.textContent = "west";
+			}
+
+			else if( (result.list[0].wind.deg).toFixed() >= 135 && (result.list[0].wind.deg).toFixed() <= 180 ){
+				p3.textContent = "west - south";
+			}
+
+			else if( (result.list[0].wind.deg).toFixed() >= 180 && (result.list[0].wind.deg).toFixed() <= 225 ){
+				p3.textContent = "south";
+			}
+
+			else if( (result.list[0].wind.deg).toFixed() >= 225 && (result.list[0].wind.deg).toFixed() <= 270 ){
+				p3.textContent = "east - south";
+			}
+
+			else if( (result.list[0].wind.deg).toFixed() >= 270 && (result.list[0].wind.deg).toFixed() <= 315 ){
+				p3.textContent = "east";
+			}
+
+			else if( (result.list[0].wind.deg).toFixed() >= 315 && (result.list[0].wind.deg).toFixed() <= 360 ){
+				p3.textContent = "north - east";
+			}
+			
+			blok.appendChild(p3);
+		}
+
+
+		createWeatherNow();
+
+		function createWeatherDay(){
+			var divD = document.createElement("div");
+			divD.className = "blok_day"
+			document.body.appendChild(divD);
+				for (var i = 8; i<result.list.length; i += 8 ){ // через каждые 8 проходов будет новый день, прогноз сразу на след день
+						var pDay = document.createElement("div");
+						pDay.className = "day";
+						var time = result.list[0].dt_txt.split(" ")[1];
+						var date = result.list[i].dt_txt.split(" "); 
+						console.log(date);
+						pDay.textContent = date[0] + ' ' + date[1].substr(0, time.length - 3);
+
+						var fon = document.createElement("div");
+						fon.className = "fon";
+						fon.appendChild(pDay);
+						divD.appendChild(fon);
+						var img_icon = document.createElement("img");
+						img_icon.className = "pictures_icon";
+						img_icon.setAttribute("src", result.list[i].weather[0].icon + ".png");
+						fon.appendChild(img_icon);
+
+						var div_day_temp = document.createElement("div");
+						div_day_temp.className = "DayWeather";
+						div_day_temp.textContent = (result.list[i].main.temp - 273).toFixed() + " С°";
+						fon.appendChild(div_day_temp);
+
+
+						}
+		  }	
+		  createWeatherDay();	 
+	}
+
+	req.onerror = function() {
+		console.log( req.status )
+	}
+
+ 	req.open("GET", "http://api.openweathermap.org/data/2.5/forecast?q=Minsk,by&APPID=47140b525891d1820cb4d68a04d3aca7", true);
+ 	
+	req.responseType = "json"; // json формат ответа от сервера
+	req.send();
+}
+
+
+getWeather();
+
+
+	</script>
+</body>
+</html>
+
